@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dleplugin>
+	<name>News Sitemap</name>
+	<description>Google haberler uyumlu site haritaları oluşturun</description>
+	<icon>engine/skins/images/newsmap.png</icon>
+	<version>1.3</version>
+	<dleversion>13.0</dleversion>
+	<versioncompare>greater</versioncompare>
+	<upgradeurl></upgradeurl>
+	<filedelete>1</filedelete>
+	<mysqlinstall><![CDATA[ALTER TABLE {prefix}_category ADD allow_map TINYINT(1) NOT NULL DEFAULT '1';]]></mysqlinstall>
+	<mysqlupgrade><![CDATA[]]></mysqlupgrade>
+	<mysqlenable><![CDATA[INSERT INTO {prefix}_admin_sections (name, icon, title, descr, allow_groups) VALUES ('newsmap', 'engine/skins/images/newsmap.png', 'MWS News Sitemap v1.3', 'Google haberler uyumlu site haritaları oluşturun', '1')]]></mysqlenable>
+	<mysqldisable><![CDATA[DELETE FROM {prefix}_admin_sections WHERE name = 'newsmap';]]></mysqldisable>
+	<mysqldelete><![CDATA[DELETE FROM {prefix}_admin_sections WHERE name = 'newsmap';
+ALTER TABLE {prefix}_category DROP allow_map;]]></mysqldelete>
+	<file name="engine/modules/addnews.php">
+		<operation action="after">
+			<searchcode><![CDATA[if( $approve ) {]]></searchcode>
+			<replacecode><![CDATA[// News Sitemap
+	$newsmap_mode = "modules/addnews";
+	include ROOT_DIR . "/engine/modules/newsmap.update.php";
+// News Sitemap]]></replacecode>
+		</operation>
+	</file>
+	<file name="engine/ajax/editnews.php">
+		<operation action="after">
+			<searchcode><![CDATA[clear_cache( array( 'news_', 'rss', $cprefix ) );]]></searchcode>
+			<replacecode><![CDATA[// News Sitemap
+	$newsmap_mode = "ajax/editnews";
+	include ROOT_DIR . "/engine/modules/newsmap.update.php";
+// News Sitemap]]></replacecode>
+		</operation>
+	</file>
+	<file name="engine/inc/addnews.php">
+		<operation action="before">
+			<searchcode><![CDATA[msg( "success", $lang['addnews_ok'], $lang['addnews_ok_1']]]></searchcode>
+			<replacecode><![CDATA[// News Sitemap
+	$newsmap_mode = "inc/addnews";
+	include ROOT_DIR . "/engine/modules/newsmap.update.php";
+// News Sitemap]]></replacecode>
+		</operation>
+	</file>
+	<file name="engine/inc/editnews.php">
+		<operation action="after">
+			<searchcode><![CDATA[clear_cache( array('news_', 'full_'.$item_db[0], 'comm_'.$item_db[0], 'tagscloud_', 'archives_', 'calendar_', 'rss', 'stats') );]]></searchcode>
+			<replacecode><![CDATA[// News Sitemap
+	$newsmap_mode = "inc/editnews";
+	include ROOT_DIR . "/engine/modules/newsmap.update.php";
+// News Sitemap]]></replacecode>
+		</operation>
+	</file>
+	<file name="engine/inc/categories.php">
+		<operation action="after">
+			<searchcode><![CDATA[$allow_rss = intval($_POST['allow_rss']);]]></searchcode>
+			<replacecode><![CDATA[// News Sitemap
+	$allow_map = intval($_POST['allow_map']);
+// News Sitemap]]></replacecode>
+		</operation>
+		<operation action="replace">
+			<searchcode><![CDATA[metatitle, show_sub, allow_rss]]></searchcode>
+			<replacecode><![CDATA[metatitle, show_sub, allow_rss, allow_map]]></replacecode>
+		</operation>
+		<operation action="replace">
+			<searchcode><![CDATA['$meta_title', '$show_sub', '$allow_rss']]></searchcode>
+			<replacecode><![CDATA['$meta_title', '$show_sub', '$allow_rss', '$allow_map']]></replacecode>
+		</operation>
+		<operation action="replace">
+			<searchcode><![CDATA[allow_rss='$allow_rss']]></searchcode>
+			<replacecode><![CDATA[allow_rss='$allow_rss', allow_map='$allow_map']]></replacecode>
+		</operation>
+		<operation action="after">
+			<searchcode><![CDATA[		<div class="form-group">
+		  <label class="control-label col-md-2 col-sm-3">{$lang['cat_allow_rss']}</label>
+		  <div class="col-md-10 col-sm-9">
+			{$row['allow_rss']}
+		  </div>
+		 </div>	]]></searchcode>
+			<replacecode><![CDATA[<!--NewsSitemap1-->
+<div class="form-group">
+  <label class="control-label col-md-2 col-sm-3">News Haritasına Ekle</label>
+  <div class="col-lg-10 col-sm-9">
+	{$row['allow_map']}
+  </div>
+ </div>
+<!--NewsSitemap1-->]]></replacecode>
+		</operation>
+		<operation action="before">
+			<searchcode><![CDATA[		<div class="form-group">
+			<div class="row">
+				<div class="col-sm-6">
+					<label>{$lang['opt_sys_sub']}</label>]]></searchcode>
+			<replacecode><![CDATA[<!--NewsSitemap2-->
+<div class="form-group">
+	<div class="row">
+		<div class="col-sm-12">
+			<label>News Haritasına Ekle</label>
+			<select class="uniform" name="allow_map" data-width="100%">
+				<option value="1" selected>{$lang['opt_sys_yes']}</option>
+				<option value="2">{$lang['opt_sys_no']}</option>
+			</select>
+		</div>
+	</div>
+</div>
+<!--NewsSitemap2-->]]></replacecode>
+		</operation>
+		<operation action="after">
+			<searchcode><![CDATA[$row['allow_rss'] = makeDropDown( array ("1" => $lang['opt_sys_yes'], "0" => $lang['opt_sys_no'] ), "allow_rss", $row['allow_rss'] );]]></searchcode>
+			<replacecode><![CDATA[$row['allow_map'] = makeDropDown( array ("1" => $lang['opt_sys_yes'], "0" => $lang['opt_sys_no'] ), "allow_map", $row['allow_map'] );]]></replacecode>
+		</operation>
+	</file>
+</dleplugin>
